@@ -27,7 +27,7 @@ jobs:
       - name: Setup Android Command Line Tools
         run: |
           mkdir -p ~/.buildozer/android/platform/android-sdk/cmdline-tools
-          curl -o commandlinetools.zip https://google.com
+          curl -o commandlinetools.zip https://google.com.....
           unzip -q commandlinetools.zip -d ~/.buildozer/android/platform/android-sdk/cmdline-tools
           mv ~/.buildozer/android/platform/android-sdk/cmdline-tools/cmdline-tools ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest
 
