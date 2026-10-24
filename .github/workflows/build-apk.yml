@@ -24,20 +24,17 @@ jobs:
         sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev tk-dev libgdbm-compat-dev libreoffice-dev libmpdec-dev
         pip3 install --user --upgrade buildozer cython virtualenv
 
-    - name: Build APK with Auto License
+    - name: Pre-accept Android Licenses
       run: |
-        # اینڈرائیڈ ہوم کا پاتھ سیٹ کرنا
-        export ANDROID_HOME=$HOME/.buildozer/android/platform/android-sdk
+        mkdir -p ~/.android
+        touch ~/.android/repositories.cfg
+        mkdir -p $HOME/.buildozer/android/platform/android-sdk/licenses
         
-        # بلڈوزر کو پہلی بار چلانا تاکہ وہ فولڈرز بنا لے
-        buildozer android debug || true
-        
-        # اگر سڈک مینیجر موجود ہے تو تمام لائسنس آٹو قبول کرنا
-        if [ -f "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" ]; then
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
-        elif [ -f "$ANDROID_HOME/tools/bin/sdkmanager" ]; then
-          yes | $ANDROID_HOME/tools/bin/sdkmanager --licenses || true
-        fi
-        
-        # فائنل بلڈ رن کرنا
+        # اینڈرائیڈ کے تمام ضروری لائسنسز کے ہیش کوڈز کو پہلے سے فائل میں سیو کرنا
+        echo -e "\n8933bad161af4178b1185d1a37fd41ea5269c55\nd56f5187479451eabf01fb74fa6df2d34959d843\n24333f1a63b6825ea9c5514f83c2829b004d1fee" > $HOME/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+        echo -e "\n84831b9409646a918e30573bab4c9c91346d8abd" > $HOME/.buildozer/android/platform/android-sdk/licenses/android-sdk-preview-license
+        echo -e "\n659ef79b74f4b3ba485603cca2241b4d11f850d2" > $HOME/.buildozer/android/platform/android-sdk/licenses/android-googletv-license
+
+    - name: Build APK
+      run: |
         buildozer -v android debug
