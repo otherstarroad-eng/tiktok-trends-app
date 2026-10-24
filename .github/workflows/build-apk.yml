@@ -32,10 +32,21 @@ jobs:
         sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev tk-dev libgdbm-compat-dev libreoffice-dev libmpdec-dev
         pip3 install --user --upgrade buildozer cython virtualenv
 
-    - name: Build APK
+    - name: Fix SDK Manager and Build APK
       run: |
+        # ٹولز ڈاؤن لوڈ کرنے کے لیے فولڈر بنانا
+        mkdir -p ~/.buildozer/android/platform
+        
+        # اینڈرائیڈ کمانڈ لائن ٹولز ڈاؤن لوڈ کرنا تاکہ sdkmanager کا ایرر نہ آئے
+        wget https://google.com -O commandlinetools.zip
+        unzip commandlinetools.zip -d ~/.buildozer/android/platform/cmdline-tools
+        mv ~/.buildozer/android/platform/cmdline-tools/cmdline-tools ~/.buildozer/android/platform/cmdline-tools/latest
+        
+        # لائسنس قبول کرنا
         mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
         echo -e "\n8933bad161af4178b1185d1a37fd41ea5269c55" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+        
+        # بلڈ رن کرنا
         buildozer -v android debug
       env:
         ACCEPT_SDK_LICENSE: "y"
