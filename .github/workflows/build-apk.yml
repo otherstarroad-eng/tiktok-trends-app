@@ -1,39 +1,35 @@
 name: Build Android APK with Buildozer
-on: [push, workflow_dispatch]
+
+on:
+  push:
+    branches: [ main ]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+    - name: Checkout Code
+      uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-python: '3.10'
 
-      - name: Install Buildozer and Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libffi-dev libssl-dev autoconf automake libtool pkg-config zlib1g-dev python3-pip openjdk-17-jdk
-          pip install --upgrade pip
-          pip install buildozer cython setuptools
+    - name: Cache Buildozer Packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.buildozer
+          .buildozer
+        key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec') }}
 
-      - name: Accept Android SDK Licenses
-        run: |
-          mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
-          echo -e "\n8933bad161af4178b1185d1a37fdd41ea5269c55\nd56f5187479451eabf01fb74ab6e7d1a2c2b783d\n24333f1a63b6825ea9c5514f83c2829b004d1fee" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license || true
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev tk-dev libgdbm-compat-dev libreoffice-dev libmpdec-dev
+        pip3 install --user --upgrade buildozer cython virtualenv
 
-      - name: Build APK with Buildozer
-        run: |
-          buildozer -v android debug
-        env:
-          ACCEPT_SDK_LICENSE: "y"
-
-      - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: tiktok-trends-apk
-          path: bin/*.apk
-          
+    - name: Build APK
+      run: buildozer android debug
