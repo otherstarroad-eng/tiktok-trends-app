@@ -10,40 +10,46 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
 
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v3
+      # ---> جاوا 17 کا اسٹیپ یہاں صحیح جگہ پر ایڈ کر دیا گیا ہے <---
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
-    - name: Install Dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev tk-dev libgdbm-compat-dev libreoffice-dev libmpdec-dev
-        pip3 install --user --upgrade buildozer cython virtualenv
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
 
-    - name: Pre-accept Android Licenses
-      run: |
-        mkdir -p ~/.android
-        touch ~/.android/repositories.cfg
-        mkdir -p $HOME/.buildozer/android/platform/android-sdk/licenses
-        echo -e "\n8933bad161af4178b1185d1a37fd41ea5269c55\nd56f5187479451eabf01fb74fa6df2d34959d843" > $HOME/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev
+          pip3 install --user --upgrade buildozer cython virtualenv
 
-    - name: Build APK
-      run: |
-        # اگر spec فائل غائب ہو تو پہلے بنائیں
-        if [ ! -f "buildozer.spec" ]; then
-          ~/.local/bin/buildozer init
-        fi
-        ~/.local/bin/buildozer -v android debug
+      - name: Pre-accept Android Licenses
+        run: |
+          mkdir -p ~/.android
+          touch ~/.android/repositories.cfg
+          mkdir -p $HOME/.buildozer/android/platform/android-sdk/licenses
+          echo -e "\n8933bad161af4178b1185d1a37f441ea5269c551\nd56f5187479451e0bffd1b74f4d6f2d34959d843" > $HOME/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
 
-    - name: Upload APK Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: tiktok-trends-apk
-        path: bin/*.apk
+      - name: Build APK
+        run: |
+          if [ ! -f "buildozer.spec" ]; then
+            ~/.local/bin/buildozer init
+          fi
+          ~/.local/bin/buildozer -v android debug
+
+      - name: Upload APK Artifact
+        uses: actions/artifacts/upload-artifact@v4
+        with:
+          name: tiktok-trends-apk
+          path: bin/*.apk
